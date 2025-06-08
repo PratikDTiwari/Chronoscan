@@ -13,7 +13,7 @@ from typing import List, Optional, Set
 CONFIG = {
     "USER_AGENT": "ArchivEye/1.0 (Enhanced; contact@example.com)",
     "DEFAULT_THREADS": 10,
-    "TIMEOUT_SECONDS": 7,  # Increased timeout slightly for network fluctuations
+    "TIMEOUT_SECONDS": 7,
     "DIRECTORY_LISTING_PATTERNS": [
         "Index of /",
         "Directory Listing for",
@@ -23,8 +23,8 @@ CONFIG = {
         "Name</a>",
         "Size</a>",
         "Description</a>",
-        "<hr>",  # Common in Apache directory listings
-        "Apache/2.4.6 (CentOS) Server at",  # Specific server versions
+        "<hr>",
+        "Apache/2.4.6 (CentOS) Server at",
     ],
     "chronoscan_CDX_URL": "https://web.archive.org/cdx/search/cdx",
 }
@@ -38,7 +38,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def display_banner() -> None:
-    """Displays the tool's ASCII art banner."""
     banner = r"""
 
  ▄████▄  ██░ ██ ██▀███  ▒█████  ███▄    █ ▒█████   ██████ ▄████▄  ▄▄▄      ███▄    █ 
@@ -61,15 +60,6 @@ def display_banner() -> None:
     logger.info("-" * 80)
 
 def fetch_chronoscan_urls(domain: str) -> Optional[str]:
-    """
-    Fetches archived URLs for a given domain from the chronoscan Machine CDX API.
-
-    Args:
-        domain: The target domain (e.g., "example.com").
-
-    Returns:
-        The path to a temporary file containing the fetched URLs, or None if an error occurs.
-    """
     logger.info(f"[+] Querying chronoscan Machine for {domain}...")
     params = {
         "url": f"*.{domain}/*",
@@ -77,7 +67,7 @@ def fetch_chronoscan_urls(domain: str) -> Optional[str]:
         "fl": "original",
         "collapse": "urlkey",
         "page": "/",
-        "limit": 100000  # Increased limit for more comprehensive results
+        "limit": 100000
     }
     headers = {'User-Agent': CONFIG["USER_AGENT"]}
     temp_file_path = None
@@ -95,7 +85,6 @@ def fetch_chronoscan_urls(domain: str) -> Optional[str]:
                 for line in response.iter_lines(decode_unicode=True):
                     if line.strip():
                         temp_file.write(line.strip() + "\n")
-                logger.debug(f"Successfully fetched chronoscan URLs to temporary file: {temp_file_path}")
             return temp_file_path
     except requests.exceptions.HTTPError as e:
         logger.error(f"[-] HTTP error fetching chronoscan data for {domain}: {e} (Status Code: {e.response.status_code})")
@@ -110,16 +99,6 @@ def fetch_chronoscan_urls(domain: str) -> Optional[str]:
     return None
 
 def extract_paths_for_domain(temp_file_path: str, target_domain: str) -> List[str]:
-    """
-    Extracts unique paths relevant to the target domain from a file of URLs.
-
-    Args:
-        temp_file_path: Path to the temporary file containing chronoscan URLs.
-        target_domain: The domain for which to extract paths.
-
-    Returns:
-        A sorted list of unique URL paths.
-    """
     unique_paths: Set[str] = set()
     try:
         with open(temp_file_path, "r", encoding="utf-8", errors='ignore') as temp_file:
@@ -138,8 +117,8 @@ def extract_paths_for_domain(temp_file_path: str, target_domain: str) -> List[st
                             if "." not in os.path.basename(path) and not path.endswith('/'):
                                 path += '/'
                             unique_paths.add(path)
-                except ValueError as e:
-                    logger.debug(f"Skipping malformed URL '{url}': {e}")
+                except ValueError:
+                    continue
     except FileNotFoundError:
         logger.error(f"[-] Temporary file not found: {temp_file_path}")
     except Exception as e:
@@ -147,16 +126,6 @@ def extract_paths_for_domain(temp_file_path: str, target_domain: str) -> List[st
     return sorted(unique_paths)
 
 def extract_subdomains(temp_file_path: str, base_domain: str) -> List[str]:
-    """
-    Extracts unique subdomains from a file of URLs belonging to a base domain.
-
-    Args:
-        temp_file_path: Path to the temporary file containing chronoscan URLs.
-        base_domain: The base domain (e.g., "example.com").
-
-    Returns:
-        A sorted list of unique subdomains.
-    """
     subdomains: Set[str] = set()
     domain_pattern = re.compile(rf"^(?:[a-zA-Z0-9-]+\.)*{re.escape(base_domain)}$", re.IGNORECASE)
     try:
@@ -170,8 +139,8 @@ def extract_subdomains(temp_file_path: str, base_domain: str) -> List[str]:
                     hostname = parsed_url.hostname
                     if hostname and hostname != base_domain and domain_pattern.match(hostname):
                         subdomains.add(hostname)
-                except ValueError as e:
-                    logger.debug(f"Skipping malformed URL '{url}' during subdomain extraction: {e}")
+                except ValueError:
+                    continue
     except FileNotFoundError:
         logger.error(f"[-] Temporary file not found: {temp_file_path}")
     except Exception as e:
@@ -179,16 +148,6 @@ def extract_subdomains(temp_file_path: str, base_domain: str) -> List[str]:
     return sorted(subdomains)
 
 def check_directory_listing(domain: str, path: str) -> Optional[str]:
-    """
-    Checks a given URL for signs of a directory listing.
-
-    Args:
-        domain: The domain to check.
-        path: The path component of the URL.
-
-    Returns:
-        The URL if a directory listing is detected, otherwise None.
-    """
     protocols = ["https", "http"]
     headers = {'User-Agent': CONFIG["USER_AGENT"]}
     if not path.startswith('/'):
@@ -224,14 +183,6 @@ def check_directory_listing(domain: str, path: str) -> Optional[str]:
     return None
 
 def process_single_target(target: str, temp_file_path: str, threads: int) -> None:
-    """
-    Processes a single domain (or subdomain) for directory listings.
-
-    Args:
-        target: The domain or subdomain to process.
-        temp_file_path: Path to the temporary file with all fetched URLs.
-        threads: Number of threads to use for checking directory listings.
-    """
     logger.info(f"\n[+] Processing target: {target}")
     paths = extract_paths_for_domain(temp_file_path, target)
     if not paths:
@@ -258,17 +209,19 @@ def process_single_target(target: str, temp_file_path: str, threads: int) -> Non
         logger.info(f"\n[+] Summary of Directory Listings for {target}:")
         for listing in sorted(directory_listings):
             logger.info(f"  - {listing}")
+
+        # Save summary to a file named after the domain
+        safe_domain = target.replace('/', '_')
+        file_path = f"{safe_domain}.txt"
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(f"Summary of Directory Listings for {target}:\n")
+            for listing in sorted(directory_listings):
+                f.write(f"{listing}\n")
+        logger.info(f"[+] Summary saved to: {file_path}")
     else:
         logger.info(f"[-] No directory listings found for {target}.")
 
 def process_domains_from_file(file_path: str, threads: int) -> None:
-    """
-    Reads domains from a file and processes each for directory listings.
-
-    Args:
-        file_path: Path to the file containing domains (one per line).
-        threads: Number of threads for checking.
-    """
     try:
         with open(file_path, "r", encoding="utf-8", errors='ignore') as file:
             domains = [line.strip() for line in file if line.strip()]
@@ -295,13 +248,6 @@ def process_domains_from_file(file_path: str, threads: int) -> None:
         logger.error(f"[-] An unexpected error occurred while processing domains from file: {e}")
 
 def auto_discover_and_process(domain: str, threads: int) -> None:
-    """
-    Automatically discovers subdomains for a given domain and processes them.
-
-    Args:
-        domain: The base domain for subdomain discovery.
-        threads: Number of threads for checking.
-    """
     logger.info(f"[+] Initiating auto-discovery for subdomains of {domain}...")
     temp_file_path = fetch_chronoscan_urls(domain)
     if not temp_file_path:
@@ -326,7 +272,6 @@ def auto_discover_and_process(domain: str, threads: int) -> None:
             logger.debug(f"Deleted temporary file: {temp_file_path}")
 
 def main() -> None:
-    """Main function to parse arguments and run the ArchivEye tool."""
     display_banner()
     parser = argparse.ArgumentParser(
         description="ArchivEye v1.0 - Enhanced Directory Listing Detection Using chronoscan Machine",
@@ -356,7 +301,14 @@ def main() -> None:
         action="store_true",
         help="Enable verbose output (debug messages)"
     )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=CONFIG["TIMEOUT_SECONDS"],
+        help="Timeout (in seconds) for network requests (default: %(default)s)"
+    )
     args = parser.parse_args()
+    CONFIG["TIMEOUT_SECONDS"] = args.timeout
     if args.verbose:
         logger.setLevel(logging.DEBUG)
         logger.debug("Verbose logging enabled.")
