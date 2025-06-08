@@ -1,17 +1,17 @@
 # 📂 Chronoscan
 
-**Chronoscan** is a robust Python tool designed for security researchers and penetration testers. It uncovers potential open directory listings by analyzing archived URLs from the Wayback Machine.
+**Chronoscan** is a robust Python tool designed for security researchers and penetration testers. It uncovers potential open directory listings by analyzing archived URLs from the Chronoscan Machine.
 
 ---
 
 ## ✨ Key Features
 
-- **Wayback Machine Integration**
+- **Chronoscan Machine Integration**
   - Retrieves archived URLs for any specified domain.
 - **Directory Listing Detection**
   - Identifies open directory listings using customizable detection patterns.
 - **Subdomain Discovery**
-  - Automatically detects and scans subdomains from Wayback data.
+  - Automatically detects and scans subdomains from Chronoscan data.
 - **Concurrent Scanning**
   - Utilizes multi-threading for efficient and fast processing.
 - **Error Handling**
@@ -108,7 +108,7 @@ CONFIG = {
         "<hr>",
         "Apache/2.4.6 (CentOS) Server at",
     ],
-    "WAYBACK_CDX_URL": "https://web.archive.org/cdx/search/cdx",
+    "Chronoscan_CDX_URL": "https://web.archive.org/cdx/search/cdx",
 }
 ```
 
