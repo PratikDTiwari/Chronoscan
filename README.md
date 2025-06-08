@@ -173,5 +173,3 @@ ERROR - [-] Failed to fetch chronoscan URLs for <domain>. Cannot proceed.
 **Happy hunting and stay secure!**
 
 ---
-
-Let me know if you want additional formatting, more information on any section, or specific instructions for use!
