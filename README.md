@@ -114,6 +114,33 @@ CONFIG = {
 
 ---
 
+---
+
+## 🐞 Troubleshooting
+
+If you encounter errors such as timeouts or connection failures (e.g.):
+```
+ERROR - [-] Timeout error for <domain>: HTTPSConnectionPool(host='web.archive.org', port=443): Read timed out. (read timeout=7) [ReadTimeout]
+ERROR - [-] Failed to fetch chronoscan URLs for <domain>. Cannot proceed.
+```
+**This means the request to the Wayback Machine took too long or your network connection was unstable.**
+
+### How to Fix
+
+- **Increase Timeout:**  
+  Use the `--timeout` flag to allow more time for each request. Example:
+  ```bash
+  python chronoscan.py -d example.com --timeout 20
+  ```
+- **Check Internet Connection:**  
+  Make sure your internet is working and stable.
+- **Retry:**  
+  Sometimes the Wayback Machine (web.archive.org) is slow or rate-limited. Wait a few minutes and try again.
+- **Verbose Mode:**  
+  Run with `-v` to see more detailed error messages for debugging.
+
+---
+
 ## 📃 License
 
 - **MIT License**
