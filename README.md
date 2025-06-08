@@ -1,7 +1,3 @@
-Absolutely! Here’s a more detailed, point-by-point rewrite of your README, using clear section headings, bullet points, and markdown formatting for better readability and emphasis.
-
----
-
 # 📂 Chronoscan
 
 **Chronoscan** is a robust Python tool designed for security researchers and penetration testers. It uncovers potential open directory listings by analyzing archived URLs from the Wayback Machine.
