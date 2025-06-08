@@ -56,7 +56,7 @@ def display_banner() -> None:
         Discover potential directory listings through archived URLs from the chronoscan Machine.
     """
     logger.info(banner)
-    logger.info("  Crafted by 1n51d3H4ck3r1337 @anmolksachan — for the community, by the community.")
+    logger.info("  Crafted by 1n51d3H4ck3r1337 @pratikdtiwari — for the community, by the community.")
     logger.info("  This tool is meant for educational and authorized security testing only.")
     logger.info("-" * 80)
 
